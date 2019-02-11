@@ -4,3 +4,9 @@ services:
     autowire: true
     autoconfigure: true
     arguments: ["@security.command.user_password_encoder"]
+
+  Vaszev\HandyBundle\Twig\HandyExtension:
+    public: false
+    autowire: true
+    autoconfigure: true
+#    arguments: ["@Vaszev\HandyBundle\Service\Handy""@service_container"]
