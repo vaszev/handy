@@ -384,11 +384,11 @@ class Handy {
             if (!file_exists($newPath . "/" . $filename)) {
               $data = getimagesize($path);
               if ($data[0] < $arr[0] && $data[1] < $arr[1]) {
-                $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_commons.image_quality'));
+                $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
               } else {
                 $gregwar->open($path)
                         ->zoomCrop($arr[0], $arr[1], 'transparent', 'center', 'top')
-                        ->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_commons.image_quality'));
+                        ->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
               }
               $this->pngCompression($newPath . "/" . $filename);
             }
@@ -401,11 +401,11 @@ class Handy {
             $data = getimagesize($path);
             if (!file_exists($newPath . "/" . $filename)) {
               if ($data[0] < $arr[0] && $data[1] < $arr[1]) {
-                $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_commons.image_quality'));
+                $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
               } else {
                 $gregwar->open($path)
                         ->scaleResize($arr[0], $arr[1], 'transparent')
-                        ->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_commons.image_quality'));
+                        ->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
               }
               $this->pngCompression($newPath . "/" . $filename);
             }
@@ -426,8 +426,8 @@ class Handy {
       $unfold = explode("/", $path);
       $filename = array_pop($unfold);
       $parentPath = implode("/", $unfold);
-      $relativePath = $this->container->getParameter('vaszev_commons.docs');
-      $variations = $this->container->getParameter('vaszev_commons.image_variations');
+      $relativePath = $this->container->getParameter('vaszev_handy.docs');
+      $variations = $this->container->getParameter('vaszev_handy.image_variations');
       foreach ($variations as $variation => $arr) {
         if ($variation == $size) {
           // let aspect ratio the same
@@ -436,9 +436,9 @@ class Handy {
           $data = getimagesize($path);
           if (!file_exists($newPath . "/" . $filename)) {
             if ($data[0] < $arr[0] && $data[1] < $arr[1]) {
-              $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_commons.image_quality'));
+              $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
             } else {
-              $gregwar->open($path)->cropResize($arr[0], $arr[1], 'transparent')->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_commons.image_quality'));
+              $gregwar->open($path)->cropResize($arr[0], $arr[1], 'transparent')->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
             }
             $this->pngCompression($newPath . "/" . $filename);
           }
