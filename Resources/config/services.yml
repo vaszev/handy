@@ -1,0 +1,6 @@
+services:
+  Vaszev\HandyBundle\Service\Handy:
+    public: false
+    autowire: true
+    autoconfigure: true
+    arguments: ["@security.command.user_password_encoder"]

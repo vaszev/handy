@@ -1,0 +1,46 @@
+{
+  "name": "vaszev/handy-bundle",
+  "type": "symfony-bundle",
+  "description": "Symfony bundle of handy stuff",
+  "keywords": ["Handy", "Symfony"],
+  "homepage": "https://github.com/vaszev/handy.git",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Roland Bodnar",
+      "email": "vaszev@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "symfony/framework-bundle": "^4.0",
+    "gregwar/image": "v2.*",
+    "ps/image-optimizer": "^1.2",
+    "ext-gd": "*",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-intl": "*"
+  },
+  "require-dev": {
+    "symfony/phpunit-bridge": "^4.0"
+  },
+  "config": {
+    "platform": {
+      "php": "7.1.3"
+    },
+    "preferred-install": {
+      "*": "dist"
+    },
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Vaszev\\HandyBundle\\": ""
+    }
+  },
+  "conflict": {
+    "symfony/symfony": "<4.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
