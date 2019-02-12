@@ -683,4 +683,24 @@ class Handy {
     return $path . '/' . $tmp;
   }
 
+
+
+  /**
+   * @param string $type [abstract,animals,business,cats,city,food,nightlife,fashion,people,nature,sports,technics,transport]
+   * @param int $w
+   * @param int $h
+   * @param $uploadDir
+   * @return string
+   */
+  public function grabRandomPicture($type = 'food', $w = 1000, $h = 700, $uploadDir = null) {
+    $imageUrl = 'http://lorempixel.com/' . $w . '/' . $h . '/' . $type . '/';
+    $content = file_get_contents($imageUrl);
+    $tmpName = uniqid() . '.jpg';
+    $tmpFile = fopen($uploadDir . '/' . $tmpName, 'wb+');
+    fwrite($tmpFile, $content);
+    fclose($tmpFile);
+
+    return $tmpName;
+  }
+
 }
