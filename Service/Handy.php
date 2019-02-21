@@ -367,59 +367,6 @@ class Handy {
 
 
 
-  public function getImageVariant($path = null, $size = null, $crop = false) {
-    if ($path) {
-      $gregwar = new Image();
-      $unfold = explode("/", $path);
-      $filename = array_pop($unfold);
-      $parentPath = implode("/", $unfold);
-      $relativePath = $this->container->getParameter('vaszev_handy.docs');
-      $variations = $this->container->getParameter('vaszev_handy.image_variations');
-      foreach ($variations as $variation => $arr) {
-        if ($variation == $size) {
-          if ($crop) {
-            // crop
-            $newPath = $parentPath . "/" . $variation . "-cropped";
-            @mkdir($newPath, "0755", true);
-            if (!file_exists($newPath . "/" . $filename)) {
-              $data = getimagesize($path);
-              if ($data[0] < $arr[0] && $data[1] < $arr[1]) {
-                $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
-              } else {
-                $gregwar->open($path)
-                        ->zoomCrop($arr[0], $arr[1], 'transparent', 'center', 'top')
-                        ->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
-              }
-              $this->pngCompression($newPath . "/" . $filename);
-            }
-
-            return ($relativePath . $variation . "-cropped" . "/" . $filename);
-          } else {
-            // let aspect ratio the same
-            $newPath = $parentPath . "/" . $variation;
-            @mkdir($newPath, "0755", true);
-            $data = getimagesize($path);
-            if (!file_exists($newPath . "/" . $filename)) {
-              if ($data[0] < $arr[0] && $data[1] < $arr[1]) {
-                $gregwar->open($path)->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
-              } else {
-                $gregwar->open($path)
-                        ->scaleResize($arr[0], $arr[1], 'transparent')
-                        ->save($newPath . "/" . $filename, 'guess', $this->container->getParameter('vaszev_handy.image_quality'));
-              }
-              $this->pngCompression($newPath . "/" . $filename);
-            }
-
-            return ($relativePath . $variation . "/" . $filename);
-          }
-        }
-      }
-    }
-    throw new FileNotFoundException('Image not found');
-  }
-
-
-
   public function getImageVersion($path = null, $size = null) {
     if ($path) {
       $gregwar = new Image();

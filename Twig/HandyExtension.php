@@ -33,7 +33,6 @@ class HandyExtension extends AbstractExtension {
         new \Twig_SimpleFilter('minutesTime', [$this, 'minutesTimeFilter']),
         new \Twig_SimpleFilter('dayName', [$this, 'dayNameFilter']),
         new \Twig_SimpleFilter('price', [$this, 'priceFilter']),
-        new \Twig_SimpleFilter('imgSize', [$this, 'imgSizeFilter']),
         new \Twig_SimpleFilter('imgSizeKept', [$this, 'imgSizeFilterKept']),
         new \Twig_SimpleFilter('friendly', [$this, 'friendlyFilter']),
         new \Twig_SimpleFilter('entityCheck', [$this, 'entityCheck']),
@@ -149,47 +148,6 @@ class HandyExtension extends AbstractExtension {
 
 
 
-  public function imgSizeFilter($path, $size = 'small', $crop = false) {
-    $outer = strpos($path, 'http');
-    if ($outer === false) {
-      // not outer
-    } else {
-      // outer link, start with http
-      return $path;
-    }
-    $rootDir = $this->container->get('kernel')->getRootDir();
-    $docPath = trim($this->container->getParameter('vaszev_handy.docs'), '/');
-    // $defaultImage = __DIR__ . '/' . $this->container->getParameter('vaszev_commons.default_image');
-    $defaultImage = $this->container->getParameter('vaszev_handy.default_image');
-    $defaultImageNewName = 'default-transparent.png';
-    $defaultImageDestination = $rootDir . '/../web/' . $docPath . '/' . $defaultImageNewName;
-    // copy default image if not exists
-    if (!file_exists($defaultImageDestination)) {
-      copy($defaultImage, $defaultImageDestination);
-    }
-    $unfold = explode('/', $path);
-    $fileStr = end($unfold);
-    $originalUrl = $docPath . '/' . $fileStr;
-    $resizedUrl = $docPath . '/' . $size . ($crop ? '-cropped' : '') . '/' . $fileStr;
-    // pre-check for image, get default is it fails
-    $originalImageSize = @getimagesize($originalUrl);
-    if (empty($originalImageSize)) {
-      // not an image
-      $originalUrl = $docPath . '/' . $defaultImageNewName;
-      $resizedUrl = $docPath . '/' . $size . ($crop ? '-cropped' : '') . '/' . $defaultImageNewName;
-    }
-    // finally, get that image with correct size
-    if (!file_exists($resizedUrl)) {
-      $resizedUrl = $this->handy->getImageVariant($originalUrl, $size, $crop);
-    } else {
-      $resizedUrl = '/' . $resizedUrl;
-    }
-
-    return $resizedUrl;
-  }
-
-
-
   public function imgSizeFilterKept($path, $size = 'small') {
     error_reporting(E_ERROR);
     $outer = strpos($path, 'http');
@@ -201,10 +159,9 @@ class HandyExtension extends AbstractExtension {
     }
     $rootDir = $this->container->get('kernel')->getRootDir();
     $docPath = trim($this->container->getParameter('vaszev_handy.docs'), '/');
-    // $defaultImage = __DIR__ . '/' . $this->container->getParameter('vaszev_commons.default_image');
     $defaultImage = $this->container->getParameter('vaszev_handy.default_image');
     $defaultImageNewName = 'default-transparent.png';
-    $defaultImageDestination = $rootDir . '/../web/' . $docPath . '/' . $defaultImageNewName;
+    $defaultImageDestination = $rootDir . '/../public/' . $docPath . '/' . $defaultImageNewName;
     // copy default image if not exists
     if (!file_exists($defaultImageDestination)) {
       copy($defaultImage, $defaultImageDestination);
@@ -228,7 +185,6 @@ class HandyExtension extends AbstractExtension {
     }
 
     return $resizedUrl;
-
   }
 
 
