@@ -437,7 +437,7 @@ class Handy {
 
   public function friendlyFilter($str) {
     if (class_exists('Transliterator')) {
-      $transliterator = \Transliterator::create('Accents-Any;Any-Latin;Latin-ASCII');
+      $transliterator = \Transliterator::create('Any-Latin;Latin-ASCII'); // Accents-Any;
       $str = $transliterator->transliterate($str);
     }
     $str = $this->removeAccents($str);
