@@ -641,7 +641,7 @@ class Handy {
    * @return string
    */
   public function grabRandomPicture($type = 'food', $w = 1000, $h = 700, $uploadDir = null) {
-    $imageUrl = 'http://lorempixel.com/' . $w . '/' . $h . '/' . $type . '/';
+    $imageUrl = 'https://lorempixel.com/' . $w . '/' . $h . '/' . $type . '/';
     $content = file_get_contents($imageUrl);
     $tmpName = uniqid() . '.jpg';
     $tmpFile = fopen($uploadDir . '/' . $tmpName, 'wb+');
