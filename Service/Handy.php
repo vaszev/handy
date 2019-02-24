@@ -442,6 +442,7 @@ class Handy {
     }
     $str = $this->removeAccents($str);
     $str = $this->replaceNonAlphanumericChars($str, "-");
+    $str = strtolower($str);
 
     return $str;
   }
