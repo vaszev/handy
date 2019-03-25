@@ -169,6 +169,10 @@ class HandyExtension extends AbstractExtension {
     $unfold = explode('/', $path);
     $fileStr = end($unfold);
     $originalUrl = $docPath . '/' . $fileStr;
+    if (!file_exists($originalUrl)) {
+      // if path is out of vaszev_handy.docs folder, we're gonna copy there
+      copy($rootDir . '/../public/' . $path, $rootDir . '/../public/' . $originalUrl);
+    }
     $resizedUrl = $docPath . '/' . $size . '-kept' . '/' . $fileStr;
     // pre-check for image, get default is it fails
     $originalImageSize = @getimagesize($originalUrl);
