@@ -3,6 +3,7 @@
 namespace Vaszev\HandyBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Glooby\Pexels\Client;
 use Gregwar\Image\Image;
 use ImageOptimizer\OptimizerFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -649,6 +650,41 @@ class Handy {
     fclose($tmpFile);
 
     return $tmpName;
+  }
+
+
+
+  /**
+   * @param $type
+   * @param null $uploadDir
+   * @param string $size [https://www.pexels.com/api/documentation/ --> image formats]
+   * @return string|null
+   */
+  public function grabSpecifiedPicture($type, $uploadDir = null, $size = 'large2x') {
+    try {
+      $pexels = new Client($this->container->getParameter('pexelsApiKey'));
+      $response = $pexels->search($type, 1, rand(1, 1000));
+      if ($response->getStatusCode() == 200 && $body = json_decode($response->getBody())) {
+        $total = $body->total_results;
+        if (!$total) {
+          throw new \Exception('no results');
+        }
+        $photos = $body->photos;
+        $photo = current($photos);
+        $imageUrl = $photo->src->{$size};
+        $content = file_get_contents($imageUrl);
+        $tmpName = uniqid() . '.jpg';
+        $tmpFile = fopen($uploadDir . '/' . $tmpName, 'wb+');
+        fwrite($tmpFile, $content);
+        fclose($tmpFile);
+
+        return $tmpName;
+      }
+    } catch (\Exception $e) {
+      // error
+    }
+
+    return null;
   }
 
 }
