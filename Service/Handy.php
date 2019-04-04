@@ -697,7 +697,7 @@ class Handy {
   public function yandexTranslate($text, $languages = 'hu-en') {
     try {
       $apiKey = $this->container->getParameter('yandexTrApiKey');
-      $url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?key=' . urlencode($apiKey) . '&lang=' . urlencode($languages) . '&format=plain' . '&text=' . urlencode($text);
+      $url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?key=' . urlencode($apiKey) . '&lang=' . urlencode($languages) . '&format=plain' . '&text=' . urlencode($text) ;
       $content = file_get_contents($url);
       $data = json_decode($content);
       if ($data && $data->code == 200) {
