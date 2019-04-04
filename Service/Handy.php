@@ -701,7 +701,7 @@ class Handy {
       $content = file_get_contents($url);
       $data = json_decode($content);
       if ($data && $data->code == 200) {
-        return $data->text;
+        return current($data->text);
       }
     } catch (\Exception $e) {
       // error

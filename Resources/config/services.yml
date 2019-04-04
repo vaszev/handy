@@ -1,7 +1,3 @@
-parameters:
-  pexelsApiKey: '563492ad6f91700001000001e8c63c381cf34c7281172c9deed04320'
-  yandexTrApiKey: 'trnsl.1.1.20190404T150655Z.d55a92393fab16d2.e9c96a65d6241630c28bb63c07f0a92f32234242'
-
 services:
   Vaszev\HandyBundle\Service\Handy:
     public: false
