@@ -639,17 +639,26 @@ class Handy {
    * @param int $w
    * @param int $h
    * @param $uploadDir
-   * @return string
+   * @return string|null
    */
   public function grabRandomPicture($type = null, $w = 1000, $h = 700, $uploadDir = null) {
-    $imageUrl = 'https://picsum.photos/' . $w . '/' . $h . '/?random';
-    $content = file_get_contents($imageUrl);
-    $tmpName = uniqid() . '.jpg';
-    $tmpFile = fopen($uploadDir . '/' . $tmpName, 'wb+');
-    fwrite($tmpFile, $content);
-    fclose($tmpFile);
+    try {
+      $imageUrl = 'https://picsum.photos/' . $w . '/' . $h . '/?random';
+      $content = file_get_contents($imageUrl);
+      if (empty($content)) {
+        throw new \Exception('error calling API');
+      }
+      $tmpName = uniqid() . '.jpg';
+      $tmpFile = fopen($uploadDir . '/' . $tmpName, 'wb+');
+      fwrite($tmpFile, $content);
+      fclose($tmpFile);
 
-    return $tmpName;
+      return $tmpName;
+    } catch (\Exception $e) {
+      // error
+    }
+
+    return null;
   }
 
 
@@ -673,6 +682,9 @@ class Handy {
         $photo = current($photos);
         $imageUrl = $photo->src->{$size};
         $content = file_get_contents($imageUrl);
+        if (empty($content)) {
+          throw new \Exception('error calling API');
+        }
         $tmpName = uniqid() . '.jpg';
         $tmpFile = fopen($uploadDir . '/' . $tmpName, 'wb+');
         fwrite($tmpFile, $content);
@@ -692,13 +704,16 @@ class Handy {
   /**
    * @param $text
    * @param string $languages
-   * @return
+   * @return string|null
    */
   public function yandexTranslate($text, $languages = 'hu-en') {
     try {
       $apiKey = $this->container->getParameter('yandexTrApiKey');
-      $url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?key=' . urlencode($apiKey) . '&lang=' . urlencode($languages) . '&format=plain' . '&text=' . urlencode($text) ;
+      $url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?key=' . urlencode($apiKey) . '&lang=' . urlencode($languages) . '&format=plain' . '&text=' . urlencode($text);
       $content = file_get_contents($url);
+      if (empty($content)) {
+        throw new \Exception('error calling API');
+      }
       $data = json_decode($content);
       if ($data && $data->code == 200) {
         return current($data->text);
@@ -707,6 +722,7 @@ class Handy {
       // error
     }
 
-    return $text;
+    return null;
   }
+
 }
