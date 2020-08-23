@@ -6,10 +6,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Intl\Intl;
 use Twig\Extension\AbstractExtension;
 use Vaszev\HandyBundle\Service\Handy;
+use Vaszev\HandyBundle\Service\MyRedis;
 
 class HandyExtension extends AbstractExtension {
 
   private $handy;
+  private $myRedis;
   private $container;
 
 
@@ -17,10 +19,12 @@ class HandyExtension extends AbstractExtension {
   /**
    * HandyExtension constructor.
    * @param Handy $handy
+   * @param MyRedis $myRedis
    * @param ContainerInterface $container
    */
-  public function __construct(Handy $handy, ContainerInterface $container) {
+  public function __construct(Handy $handy, MyRedis $myRedis, ContainerInterface $container) {
     $this->handy = $handy;
+    $this->myRedis = $myRedis;
     $this->container = $container;
   }
 
@@ -47,7 +51,15 @@ class HandyExtension extends AbstractExtension {
         new \Twig_SimpleFilter('autoPunctuation', [$this, 'autoPunctuation']),
         new \Twig_SimpleFilter('quotation', [$this, 'quotation'], ['is_safe' => ['html']]),
         new \Twig_SimpleFilter('resolution', [$this, 'resolution']),
-        new \Twig_SimpleFilter('br2nl', [$this, 'br2nl']),
+        new \Twig_SimpleFilter('br2nl', [$this, 'br2nl'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('month', [$this, 'month'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('urlDecode', [$this, 'urlDecode'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('pregReplace', [$this, 'pregReplace'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('arrayToTableOfContents', [$this, 'arrayToTableOfContents'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('kgToLbs', [$this, 'kgToLbs']),
+        new \Twig_SimpleFilter('dateDayName', [$this, 'dateDayName'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('regex', [$this, 'regex'], ['is_safe' => ['html']]),
+        new \Twig_SimpleFilter('redis', [$this, 'redis'], ['is_safe' => ['html']]),
     ];
   }
 
@@ -57,7 +69,125 @@ class HandyExtension extends AbstractExtension {
     return [
         new \Twig_SimpleFunction('lorem', [$this, 'loremIpsum']),
         new \Twig_SimpleFunction('rnd', [$this, 'rndGen']),
+        new \Twig_SimpleFunction('instanceCheck', [$this, 'instanceCheck']),
+        new \Twig_SimpleFunction('randomChr', [$this, 'randomChr']),
     ];
+  }
+
+
+
+  public function redis($text, $key) {
+    $cacheKey = 'twig_' . $key . '_' . MyRedis::EXCLUDE_USER;
+    if (!$cache = $this->myRedis->getFast($cacheKey)) {
+      $this->myRedis->setFast($cacheKey, $text);
+
+      return $text;
+    }
+
+    return $cache;
+  }
+
+
+
+  public function randomChr($min = 5, $max = 10) {
+    $letters = range('a', 'z');
+    $length = rand($min, $max);
+    shuffle($letters);
+    $str = '';
+    for ($i = 0; $i < $length; $i++) {
+      $str .= (rand(0, 2) ? strtoupper($letters[$i]) : $letters[$i]);
+    }
+
+    return $str;
+  }
+
+
+
+  public function regex($str, $pattern = '/^\/.+\/[a-zA-Z]*$/', $replacement = ' ') {
+    return preg_replace($pattern, $replacement, $str);
+  }
+
+
+
+  public function dateDayName($dateStr) {
+    try {
+      $date = new \DateTime($dateStr);
+      $dayName = $date->format('D');
+    } catch (\Exception $e) {
+      $dayName = null;
+    }
+
+    return $dayName;
+  }
+
+
+
+  public function kgToLbs($kg) {
+    $lbs = round(($kg * 2.20462), 1);
+
+    return $lbs . ' lbs';
+  }
+
+
+
+  public function instanceCheck($entity, $className) {
+    $fullClassName = 'App\Entity\\' . $className;
+    $class = new $fullClassName;
+
+    return ($entity instanceof $class);
+  }
+
+
+
+  public function arrayToTableOfContents($arr, $property = 'name') {
+    $ret = [];
+    $letters = range('A', 'Z');
+    foreach ($arr as $item) {
+      $found = false;
+      $value = $item->{"get" . ucfirst($property)}();
+      $firstLetter = strtoupper(substr($value, 0, 1));
+      foreach ($letters as $letter) {
+        if ($letter == $firstLetter) {
+          if (!isset($ret[$letter])) {
+            $ret[$letter] = [];
+          }
+          $ret[$letter][] = $item;
+          $found = true;
+        }
+      }
+      if (!$found) {
+        if (!isset($ret['#'])) {
+          $ret['#'] = [];
+        }
+        $ret['#'][] = $item;
+      }
+    }
+
+    return $ret;
+  }
+
+
+
+  public function pregReplace($string, $keywords, $highLightTag = 'b') {
+    foreach ($keywords as $keyword) {
+      $string = preg_replace("/\w*?$keyword\w*/i", "<$highLightTag>$0</$highLightTag>", $string);
+    }
+
+    return $string;
+  }
+
+
+
+  public function urlDecode($url = null) {
+    return urldecode($url);
+  }
+
+
+
+  public function month($number) {
+    $ts = mktime(0, 0, 0, $number, 1, date("Y"));
+
+    return date("M", $ts);
   }
 
 

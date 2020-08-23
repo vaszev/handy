@@ -14,6 +14,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Handy {
 
+  const ROMAN_NUMERALS = ["M" => 1000, "CM" => 900, "D" => 500, "CD" => 400, "C" => 100, "XC" => 90, "L" => 50, "XL" => 40, "X" => 10, "IX" => 9, "V" => 5, "IV" => 4, "I" => 1];
+
   private $translator;
   private $container;
   private $em;
@@ -31,6 +33,252 @@ class Handy {
     $this->em = $em;
     $this->passwordEncoder = $passwordEncoder;
     $this->encoderFactory = $encoderFactory;
+  }
+
+
+
+// region +ROMANIZE
+
+  static function deromanize(String $number) {
+    $number = str_replace(" ", "", strtoupper($number));
+    $result = 0;
+    foreach (self::ROMAN_NUMERALS as $key => $value) {
+      while (strpos($number, $key) === 0) {
+        $result += $value;
+        $number = substr($number, strlen($key));
+      }
+    }
+
+    return $result;
+  }
+
+
+
+  static function romanize($number) {
+    $result = "";
+    foreach (self::ROMAN_NUMERALS as $key => $value) {
+      $result .= str_repeat($key, $number / $value);
+      $number %= $value;
+    }
+
+    return $result;
+  }
+
+// endregion
+
+// region +ZODIAC
+
+  static function zodiacSigns() {
+    $zodiacSigns = [
+        'aries'       => ['03-21', '04-19'],
+        'taurus'      => ['04-20', '05-20'],
+        'gemini'      => ['05-21', '06-20'],
+        'cancer'      => ['06-21', '07-22'],
+        'leo'         => ['07-23', '08-22'],
+        'virgo'       => ['08-23', '09-22'],
+        'libra'       => ['09-23', '10-22'],
+        'scorpio'     => ['10-23', '11-21'],
+        'sagittarius' => ['11-22', '12-21'],
+        'capricorn'   => ['12-22', '01-19'],
+        'aquarius'    => ['01-20', '02-18'],
+        'pisces'      => ['02-19', '03-20'],
+    ];
+
+    return $zodiacSigns;
+  }
+
+
+
+  /**
+   * @param string $sign
+   * @param int $baseYear
+   * @return array
+   */
+  static function zodiacRanges($sign = 'Aries', $baseYear = 2000) {
+    try {
+      $sign = strtolower($sign);
+      $zodiacSigns = self::zodiacSigns();
+      if (!($zodiacSigns[$sign] ?? false)) {
+        throw new \Exception('invalid zodiac sign');
+      }
+      $zodiac = $zodiacSigns[$sign];
+      $from = new \DateTime($baseYear . '-' . $zodiac[0]);
+      $end = new \DateTime(($sign == 'capricorn' ? ++$baseYear : $baseYear) . '-' . $zodiac[1]);
+      $ret = ['from' => $from, 'end' => $end];
+    } catch (\Exception $e) {
+      $ret = [];
+    }
+
+    return $ret;
+  }
+
+
+
+  /**
+   * @param string $sign
+   * @param int $baseYear
+   * @return array
+   */
+  static function zodiacSignDays($sign = 'Aries', $baseYear = 2000) {
+    try {
+      $sign = strtolower($sign);
+      $zodiacSigns = self::zodiacSigns();
+      if (!($zodiacSigns[$sign] ?? false)) {
+        throw new \Exception('invalid zodiac sign');
+      }
+      $range = self::zodiacRanges($sign, $baseYear);
+      $current = $range["from"];
+      $end = $range["end"];
+      $days = [clone $current];
+      do {
+        $current->modify('+1 day');
+        $days[] = clone $current;
+      } while ($current < $end);
+    } catch (\Exception $e) {
+      $days = [];
+    }
+
+    return $days;
+  }
+
+
+
+// endregion
+
+  static function getClassName($entity) {
+    try {
+      $class = get_class($entity);
+      $path = explode("\\", $class);
+      $lastName = end($path);
+
+      return $lastName;
+
+    } catch (\Exception $e) {
+      return null;
+    }
+  }
+
+
+
+  static function extract($str, $maxLength = 150) {
+    try {
+      if (empty($str)) {
+        throw new \Exception('source is empty');
+      }
+      $str = trim(strip_tags($str));
+      if (strlen($str) <= $maxLength) {
+        return $str;
+      }
+      $str = mb_substr($str, 0, $maxLength) . '...';
+    } catch (\Exception $e) {
+      // error
+    }
+
+    return $str;
+  }
+
+
+
+  static function createRanges(array $numbers, $currentPeriod = false) {
+    sort($numbers);
+    if ($currentPeriod) {
+      $max = 0;
+      foreach ($numbers as $number) {
+        $max = ((integer)$number > $max) ? (integer)$number : $max;
+      }
+      for ($y = $max; $y <= date("Y"); $y++) {
+        $numbers[] = $y;
+      }
+    }
+    $start = $end = (integer)current($numbers);
+    $ranges = [];
+    foreach ($numbers as $range) {
+      // $range = ($range == 'current') ? date("Y") : $range;
+      if (is_numeric($range)) {
+        if ((integer)$range - $end > 1) {
+          $ranges[] = ($start == $end) ? $start : ($start . "-" . $end);
+          $start = $range;
+        }
+        $end = (integer)$range;
+      }
+    }
+    $ranges[] = ($start == $end) ? $start : ($start . "-" . $end);
+
+    return implode(",", $ranges);
+  }
+
+
+
+  /**
+   * @param $url
+   * @param int $connectTimeoutMs
+   * @param int $timeoutMs
+   * @param bool $onlyHeader
+   * @return resource
+   */
+  static function fastRemoteCurl($url, $connectTimeoutMs = 1000, $timeoutMs = 1000, $onlyHeader = false) {
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_TCP_NODELAY, 1);
+    curl_setopt($curl, CURLOPT_TCP_FASTOPEN, 1);
+    curl_setopt($curl, CURLOPT_TCP_KEEPALIVE, 1);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT_MS, $connectTimeoutMs);
+    curl_setopt($curl, CURLOPT_TIMEOUT_MS, $timeoutMs);
+    if ($onlyHeader) {
+      curl_setopt($curl, CURLOPT_HEADER, 1);
+      curl_setopt($curl, CURLOPT_NOBODY, 1);
+    } else {
+      curl_setopt($curl, CURLOPT_HEADER, 0);
+    }
+
+    return $curl;
+  }
+
+
+
+  /**
+   * @param $url
+   * @param int $connectTimeoutMs
+   * @param int $timeoutMs
+   * @return array
+   */
+  static function fastRemoteImageSize($url, $connectTimeoutMs = 1000, $timeoutMs = 1000) {
+    static $stored = [];
+    $key = md5($url . $connectTimeoutMs . $timeoutMs);
+    try {
+      $found = $stored[$key] ?? null;
+      if ($found) {
+        return $found;
+      }
+      $dims = null;
+      // header
+      $curl = self::fastRemoteCurl($url, $connectTimeoutMs, $timeoutMs, true);
+      curl_exec($curl);
+      $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+      $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+      if ($httpCode != 200 || strpos($contentType, 'image/') === false) {
+        throw new \Exception('source unavailable or invalid');
+      }
+      // body
+      curl_setopt($curl, CURLOPT_HEADER, 0);
+      curl_setopt($curl, CURLOPT_NOBODY, 0);
+      $data = curl_exec($curl);
+      curl_close($curl);
+      if (empty($data)) {
+        throw new \Exception('source unavailable or empty');
+      }
+      $dims = getimagesizefromstring($data);
+    } catch (\Exception $e) {
+      $dims = [0, 0];
+    }
+    // save for the further calls / runs
+    $stored[$key] = $dims;
+
+    return $dims;
   }
 
 
@@ -144,7 +392,7 @@ class Handy {
           $next = (list($tag, $tagWords) = each($tags));
           if (!$next) {
             reset($tags);
-            list($tag, $tagWords) = each($tags);
+            [$tag, $tagWords] = each($tags);
           }
           $htmlTmp[] = '<' . ($tag == "a" ? 'a href="javascript:void(0);"' : $tag) . '>';
         }
@@ -443,6 +691,7 @@ class Handy {
     }
     $str = $this->removeAccents($str);
     $str = $this->replaceNonAlphanumericChars($str, "-");
+
     // $str = strtolower($str);
 
     return $str;
@@ -725,4 +974,41 @@ class Handy {
     return null;
   }
 
+
+
+  static function monthToNumber($month) {
+    $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    for ($m = 0; $m < count($months); $m++) {
+      if ($months[$m] == $month) {
+        return ++$m;
+      }
+    }
+
+    return null;
+  }
+
+
+
+  static function numberToMonth($number) {
+    $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    for ($m = 0; $m < count($months); $m++) {
+      if ($m == $number - 1) {
+        return $months[$m];
+      }
+    }
+
+    return null;
+  }
+
+
+
+  static function ordinal($number) {
+    $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+
+    if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
+      return $number . 'th';
+    } else {
+      return $number . $ends[$number % 10];
+    }
+  }
 }

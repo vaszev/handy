@@ -13,16 +13,18 @@
   ],
   "require": {
     "php": "^7.1",
+    "ext-curl": "*",
+    "ext-gd": "*",
+    "ext-intl": "*",
+    "ext-json": "*",
+    "ext-zlib": "*",
+    "glooby/pexels": "^0.1.3",
+    "gregwar/image": "v2.*",
+    "predis/predis": "^1.1",
+    "ps/image-optimizer": "^1.2",
     "symfony/framework-bundle": "^4.0",
     "symfony/intl": "^4.0",
-    "twig/extensions": "^1.5",
-    "gregwar/image": "v2.*",
-    "ps/image-optimizer": "^1.2",
-    "glooby/pexels": "^0.1.3",
-    "ext-gd": "*",
-    "ext-curl": "*",
-    "ext-json": "*",
-    "ext-intl": "*"
+    "twig/extensions": "^1.5"
   },
   "require-dev": {
     "symfony/phpunit-bridge": "^4.0"
