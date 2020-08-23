@@ -9,10 +9,8 @@ services:
     public: false
     autowire: true
     autoconfigure: true
-    arguments: ["@service_container","@security.token_storage"]
 
   Vaszev\HandyBundle\Twig\HandyExtension:
     public: false
     autowire: true
     autoconfigure: true
-#    arguments: ["@Vaszev\HandyBundle\Service\Handy""@service_container"]

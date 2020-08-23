@@ -5,6 +5,7 @@ namespace Vaszev\HandyBundle\Service;
 use Predis\Client;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Csrf\TokenStorage\TokenStorageInterface;
 
 
 class MyRedis {
@@ -26,7 +27,7 @@ class MyRedis {
    * @param ContainerInterface $containerInterface
    * @param TokenStorage $token
    */
-  public function __construct(ContainerInterface $containerInterface, TokenStorage $token) {
+  public function __construct(ContainerInterface $containerInterface, TokenStorageInterface $token) {
     $this->token = $token;
     $this->containerInterface = $containerInterface;
     $this->redis = new Client([

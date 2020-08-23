@@ -9,7 +9,6 @@ use ImageOptimizer\OptimizerFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Handy {
@@ -19,7 +18,6 @@ class Handy {
   private $translator;
   private $container;
   private $em;
-  /** @var UserPasswordEncoderInterface */
   private $passwordEncoder;
   private $encoderFactory;
 
