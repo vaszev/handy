@@ -5,6 +5,8 @@ namespace Vaszev\HandyBundle\Twig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Intl\Intl;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 use Vaszev\HandyBundle\Service\Handy;
 use Vaszev\HandyBundle\Service\MyRedis;
 
@@ -32,34 +34,34 @@ class HandyExtension extends AbstractExtension {
 
   public function getFilters() {
     return [
-        new \Twig_SimpleFilter('joinByKey', [$this, 'joinByKey']),
-        new \Twig_SimpleFilter('secret', [$this, 'secret']),
-        new \Twig_SimpleFilter('minutesTime', [$this, 'minutesTimeFilter']),
-        new \Twig_SimpleFilter('dayName', [$this, 'dayNameFilter']),
-        new \Twig_SimpleFilter('price', [$this, 'priceFilter']),
-        new \Twig_SimpleFilter('imgSizeKept', [$this, 'imgSizeFilterKept']),
-        new \Twig_SimpleFilter('friendly', [$this, 'friendlyFilter']),
-        new \Twig_SimpleFilter('entityCheck', [$this, 'entityCheck']),
-        new \Twig_SimpleFilter('metricToImperial', [$this, 'metricToImperial']),
-        new \Twig_SimpleFilter('country', [$this, 'countryFilter']),
-        new \Twig_SimpleFilter('ordinal', [$this, 'ordinal']),
-        new \Twig_SimpleFilter('strPos', [$this, 'strPos']),
-        new \Twig_SimpleFilter('strReplace', [$this, 'strReplace']),
-        new \Twig_SimpleFilter('strPad', [$this, 'strPad']),
-        new \Twig_SimpleFilter('verifiedDefault', [$this, 'verifiedDefault']),
-        new \Twig_SimpleFilter('numberScale', [$this, 'numberScale']),
-        new \Twig_SimpleFilter('autoPunctuation', [$this, 'autoPunctuation']),
-        new \Twig_SimpleFilter('quotation', [$this, 'quotation'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('resolution', [$this, 'resolution']),
-        new \Twig_SimpleFilter('br2nl', [$this, 'br2nl'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('month', [$this, 'month'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('urlDecode', [$this, 'urlDecode'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('pregReplace', [$this, 'pregReplace'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('arrayToTableOfContents', [$this, 'arrayToTableOfContents'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('kgToLbs', [$this, 'kgToLbs']),
-        new \Twig_SimpleFilter('dateDayName', [$this, 'dateDayName'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('regex', [$this, 'regex'], ['is_safe' => ['html']]),
-        new \Twig_SimpleFilter('redis', [$this, 'redis'], ['is_safe' => ['html']]),
+        new TwigFilter('joinByKey', [$this, 'joinByKey']),
+        new TwigFilter('secret', [$this, 'secret']),
+        new TwigFilter('minutesTime', [$this, 'minutesTimeFilter']),
+        new TwigFilter('dayName', [$this, 'dayNameFilter']),
+        new TwigFilter('price', [$this, 'priceFilter']),
+        new TwigFilter('imgSizeKept', [$this, 'imgSizeFilterKept']),
+        new TwigFilter('friendly', [$this, 'friendlyFilter']),
+        new TwigFilter('entityCheck', [$this, 'entityCheck']),
+        new TwigFilter('metricToImperial', [$this, 'metricToImperial']),
+        new TwigFilter('country', [$this, 'countryFilter']),
+        new TwigFilter('ordinal', [$this, 'ordinal']),
+        new TwigFilter('strPos', [$this, 'strPos']),
+        new TwigFilter('strReplace', [$this, 'strReplace']),
+        new TwigFilter('strPad', [$this, 'strPad']),
+        new TwigFilter('verifiedDefault', [$this, 'verifiedDefault']),
+        new TwigFilter('numberScale', [$this, 'numberScale']),
+        new TwigFilter('autoPunctuation', [$this, 'autoPunctuation']),
+        new TwigFilter('quotation', [$this, 'quotation'], ['is_safe' => ['html']]),
+        new TwigFilter('resolution', [$this, 'resolution']),
+        new TwigFilter('br2nl', [$this, 'br2nl'], ['is_safe' => ['html']]),
+        new TwigFilter('month', [$this, 'month'], ['is_safe' => ['html']]),
+        new TwigFilter('urlDecode', [$this, 'urlDecode'], ['is_safe' => ['html']]),
+        new TwigFilter('pregReplace', [$this, 'pregReplace'], ['is_safe' => ['html']]),
+        new TwigFilter('arrayToTableOfContents', [$this, 'arrayToTableOfContents'], ['is_safe' => ['html']]),
+        new TwigFilter('kgToLbs', [$this, 'kgToLbs']),
+        new TwigFilter('dateDayName', [$this, 'dateDayName'], ['is_safe' => ['html']]),
+        new TwigFilter('regex', [$this, 'regex'], ['is_safe' => ['html']]),
+        new TwigFilter('redis', [$this, 'redis'], ['is_safe' => ['html']]),
     ];
   }
 
@@ -67,10 +69,10 @@ class HandyExtension extends AbstractExtension {
 
   public function getFunctions() {
     return [
-        new \Twig_SimpleFunction('lorem', [$this, 'loremIpsum']),
-        new \Twig_SimpleFunction('rnd', [$this, 'rndGen']),
-        new \Twig_SimpleFunction('instanceCheck', [$this, 'instanceCheck']),
-        new \Twig_SimpleFunction('randomChr', [$this, 'randomChr']),
+        new TwigFunction('lorem', [$this, 'loremIpsum']),
+        new TwigFunction('rnd', [$this, 'rndGen']),
+        new TwigFunction('instanceCheck', [$this, 'instanceCheck']),
+        new TwigFunction('randomChr', [$this, 'randomChr']),
     ];
   }
 
