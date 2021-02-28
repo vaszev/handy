@@ -139,4 +139,46 @@ class MyRedis {
     return $this->setFast($key, $data, $lifeTime);
   }
 
+
+
+  /**
+   * @return mixed
+   */
+  public function flushDB() {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+
+      return $this->redis->flushdb();
+    } catch (\Exception $e) {
+      // error
+      return false;
+    }
+  }
+
+
+
+  /**
+   * @return array
+   */
+  public function info(): array {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+
+      return $this->redis->info();
+    } catch (\Exception $e) {
+      // error
+      return [];
+    }
+  }
+
 }
