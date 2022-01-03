@@ -181,4 +181,35 @@ class MyRedis {
     }
   }
 
+
+
+  /**
+   * @param string $keyPart
+   * @return mixed
+   */
+  public function deleteAllKeysExceptLikeThis(string $keyPart = 'PHPREDIS_SESSION') {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+      $trashKeys = [];
+      foreach ($this->redis->keys('*') as $key) {
+        if (strpos($key, $keyPart) === false) {
+          $trashKeys[] = $key;
+        }
+      }
+      if ($trashKeys) {
+        return $this->redis->del($trashKeys);
+      }
+
+      return false;
+    } catch (\Exception $e) {
+      // error
+      return false;
+    }
+  }
+
 }
