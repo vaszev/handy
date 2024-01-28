@@ -708,7 +708,6 @@ class Handy {
       $cm = $cm % (($feets * 0.3048) * 100);
       $inches = round(!$cm ? 0 : $cm / 2.54);
       if ($inches == 12) {
-        // post convert
         $feets++;
         $inches = 0;
       }
