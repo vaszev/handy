@@ -718,7 +718,6 @@ class Handy {
         $ret .= $inches . '"';
       }
     } catch (\Exception $e) {
-      // error
       $ret = null;
     }
 
