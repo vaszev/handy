@@ -705,14 +705,13 @@ class Handy {
       }
       $meters = $cm / 100;
       $feets = floor($meters * 3.2808);
-      if (!$feets) {
-        throw new \Exception('feet value became zero');
-      }
       $cm = $cm % (($feets * 0.3048) * 100);
-      if (!$cm) {
-        throw new \Exception('cm value became zero');
-      }
       $inches = round(!$cm ? 0 : $cm / 2.54);
+      if ($inches == 12) {
+        // post convert
+        $feets++;
+        $inches = 0;
+      }
       if ($feets) {
         $ret .= $feets . "'";
       }
