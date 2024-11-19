@@ -212,4 +212,47 @@ class MyRedis {
     }
   }
 
+
+
+  function deleteKeysWithoutPrefixes(array $allowedPrefixes = []) {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (empty($allowedPrefixes)) {
+        throw new \Exception('allowed prefixes is empty');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+      $cursor = null;
+      $keysToDelete = [];
+      $redis = $this->redis;
+      do {
+        $response = $redis->scan($cursor, ['COUNT' => 1000]);
+        $cursor = $response[0];
+        $keys = $response[1];
+        foreach ($keys as $key) {
+          $matches = false;
+          foreach ($allowedPrefixes as $prefix) {
+            if (substr($key, 0, strlen($prefix)) === $prefix) {
+              $matches = true;
+              break;
+            }          }
+          if (!$matches) {
+            $keysToDelete[] = $key;
+          }
+        }
+      } while ($cursor != 0);
+      if (!empty($keysToDelete)) {
+        $redis->del(...$keysToDelete);
+      }
+
+      return true;
+    } catch (\Exception $e) {
+      // error
+      return false;
+    }
+  }
+
 }
