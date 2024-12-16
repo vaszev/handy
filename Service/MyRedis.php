@@ -20,6 +20,8 @@ class MyRedis {
   /** @var $redis Client */
   protected $redis;
 
+  private $compressLevel = 5; //  Can be given as 0 for no compression up to 9 for maximum compression
+
 
 
   /**
@@ -31,10 +33,37 @@ class MyRedis {
     $this->token = $token;
     $this->containerInterface = $containerInterface;
     $this->redis = new Client([
-        'scheme' => 'tcp',
-        'host'   => $containerInterface->getParameter('vaszev_handy.redis_host'),
-        'port'   => $containerInterface->getParameter('vaszev_handy.redis_port'),
+        'scheme'     => 'tcp',
+        'host'       => $containerInterface->getParameter('vaszev_handy.redis_host'),
+        'port'       => $containerInterface->getParameter('vaszev_handy.redis_port'),
+        'persistent' => true,
     ]);
+  }
+
+
+
+  /**
+   * @return int
+   */
+  public function getCompressLevel(): int {
+    return $this->compressLevel;
+  }
+
+
+
+  /**
+   * @param int $compressLevel
+   * @return MyRedis
+   */
+  public function setCompressLevel(int $compressLevel): MyRedis {
+    if ($compressLevel < 0) {
+      $compressLevel = 0;
+    } elseif ($compressLevel > 9) {
+      $compressLevel = 9;
+    }
+    $this->compressLevel = $compressLevel;
+
+    return $this;
   }
 
 
@@ -116,7 +145,7 @@ class MyRedis {
         $this->redis->connect();
       }
       $key = $this->keyPrefix($key);
-      $data = gzdeflate(serialize($data), 1);
+      $data = gzdeflate(serialize($data), $this->getCompressLevel());
       $this->redis->set($key, $data, 'EX', $lifeTime);
     } catch (\Exception $e) {
       // error
@@ -184,6 +213,29 @@ class MyRedis {
 
 
   /**
+   * @param string $key
+   * @param bool $more
+   * @return false|int
+   */
+  public function deleteKeys(string $key, $more = false) {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+
+      return $this->redis->del($key . ($more ? '*' : ''));
+    } catch (\Exception $e) {
+      // error
+      return false;
+    }
+  }
+
+
+
+  /**
    * @param string $keyPart
    * @return mixed
    */
@@ -238,7 +290,8 @@ class MyRedis {
             if (substr($key, 0, strlen($prefix)) === $prefix) {
               $matches = true;
               break;
-            }          }
+            }
+          }
           if (!$matches) {
             $keysToDelete[] = $key;
           }
