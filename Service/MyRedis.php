@@ -12,6 +12,7 @@ class MyRedis {
 
   const LIFETIME = 21600; // 6 hours
   const EXCLUDE_USER = '_noUserData_';
+  const ITERATION_POOL = 3000;  // how much keys will be checked at once != results
 
   /** @var  $containerInterface ContainerInterface */
   protected $containerInterface;
@@ -212,6 +213,30 @@ class MyRedis {
 
 
 
+  public function countKeysByPrefix($prefix): ?int {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+      $iterator = null;
+      $count = 0;
+      do {
+        [$iterator, $keys] = $this->redis->scan($iterator, ['MATCH' => $prefix . ':*', 'COUNT' => self::ITERATION_POOL]);
+        $count += count($keys);
+      } while ($iterator != 0);
+
+      return $count;
+    } catch (\Exception $e) {
+      // error
+      return null;
+    }
+  }
+
+
+
   /**
    * @param string $key
    * @param bool $more
@@ -225,8 +250,17 @@ class MyRedis {
       if (!$this->redis->isConnected()) {
         $this->redis->connect();
       }
-
-      return $this->redis->del($key . ($more ? '*' : ''));
+      if ($more) {
+        $iterator = null;
+        do {
+          [$iterator, $keys] = $this->redis->scan($iterator, ['MATCH' => $key . ':*', 'COUNT' => self::ITERATION_POOL]);
+          if ($keys) {
+            $this->redis->del($keys); // push a limited size array to "del" method
+          }
+        } while ($iterator != 0);
+      } else {
+        return $this->redis->del($key);
+      }
     } catch (\Exception $e) {
       // error
       return false;
@@ -281,7 +315,7 @@ class MyRedis {
       $keysToDelete = [];
       $redis = $this->redis;
       do {
-        $response = $redis->scan($cursor, ['COUNT' => 1000]);
+        $response = $redis->scan($cursor, ['COUNT' => self::ITERATION_POOL]);
         $cursor = $response[0];
         $keys = $response[1];
         foreach ($keys as $key) {
