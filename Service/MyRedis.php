@@ -213,6 +213,25 @@ class MyRedis {
 
 
 
+  public function isKeyExists($key): ?bool {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+      $ret = $this->redis->exists($key);
+
+      return (bool)$ret;
+    } catch (\Exception $e) {
+      // error
+      return false;
+    }
+  }
+
+
+
   public function countKeysByPrefix($prefix): ?int {
     try {
       if (!$this->isEnabled()) {
