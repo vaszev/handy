@@ -124,6 +124,32 @@ class MyRedis {
 
 
   /**
+   * @param $key
+   * @return int|null
+   */
+  public function getTTL($key) {
+    try {
+      if (!$this->isEnabled()) {
+        throw new \Exception('redis not enabled, check the "redis" parameter in config files');
+      }
+      if (!$this->redis->isConnected()) {
+        $this->redis->connect();
+      }
+      $key = $this->keyPrefix($key);
+      $ttl = (int)$this->redis->ttl($key);
+      if ($ttl <= 0) {
+        throw new \Exception('redis ttl expired');
+      }
+
+      return $ttl;
+    } catch (\Exception $e) {
+      return null;
+    }
+  }
+
+
+
+  /**
    * alias for getFast
    * @param $key
    * @return string|null
